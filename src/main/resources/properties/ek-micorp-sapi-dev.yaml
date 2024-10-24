@@ -1,0 +1,18 @@
+http:
+  host: "localhost"
+  port: "8081"
+  base: "micorp"
+
+json:
+  logger:
+    application:
+      name: "ek-micorp-sapi"
+      version: "1.0.0-SNAPSHOT"
+
+api:
+  id: "20007984"
+
+mule:
+  env: "dev"
+  key: "Csolutions@77779"
+  

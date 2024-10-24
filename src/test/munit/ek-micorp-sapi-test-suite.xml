@@ -1,0 +1,275 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+	<munit:config name="ek-micorp-sapi-test-suite.xml" />
+	<munit:test name="ek-micorp-sapi-health-check-success-test" doc:id="ca248f44-3727-4d18-90ad-82fb8a1ada0e" description="Test">
+		<munit:execution>
+			<munit:set-event doc:name="Set Event : correlationID" doc:id="e45fb264-4709-4496-a997-3716ea6c42cb">
+				<munit:variables>
+					<munit:variable key="correlationID" value="3115520d-415c-4a8b-929f-2b5b1fd5cacd" />
+				</munit:variables>
+			</munit:set-event>
+			<flow-ref doc:name="Flow-ref to get:\healthcheck:ek-micorp-sapi-config" doc:id="ed994f59-adfb-495e-a815-12933b0f9b93" name="get:\healthcheck:ek-micorp-sapi-config" />
+		</munit:execution>
+		<munit:validation>
+			<munit-tools:assert-equals doc:name="Assert equals : payload" doc:id="6c8e6f21-2e76-4722-87ca-02a608597c92" actual="#[payload]" expected="#[readUrl('classpath://files//health-check-response-success.dwl')]" />
+			<munit-tools:verify-call doc:name="Verify call : End" doc:id="0c48dd6f-876c-4968-a33a-fde8582b7984" processor="json-logger:logger" atLeast="1">
+				<munit-tools:with-attributes>
+					<munit-tools:with-attribute whereValue="2e8e08a4-500f-4b5d-9984-1cbb74f628d1" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="ek-micorp-sapi-customer-details-success-test" doc:id="889f00b9-3ce3-45a7-a862-532421d6825b" description="Test">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when : Customer Details" doc:id="512d9a58-69c3-4d89-914b-4bd4817f29f1" processor="salesforce:query">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="8609309e-0a81-43d7-aec5-d53d4f786b70" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[readUrl('classpath://files//query-response -salesforce.dwl')]" mediaType="application/java" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Event : payload" doc:id="93b79bee-0dbf-4163-bdfe-6687a4467a04" >
+				<munit:payload value="#[{&#10;    &quot;query&quot;:&quot;SELECT Name,firstName__c, lastName__c FROM micorpCustomer__c WHERE email__c = 'easwanth12@gmail.com'&quot;&#10;}]" mediaType="application/json" />
+				<munit:variables >
+					<munit:variable key="correlationID" value="3115520d-415c-4a8b-929f-2b5b1fd5cacd" />
+				</munit:variables>
+			</munit:set-event>
+			<flow-ref doc:name="Flow-ref to get:\customer:ek-micorp-sapi-config" doc:id="ff633539-0028-4129-b749-5d1e1889c12d" name="get:\customer:ek-micorp-sapi-config"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-equals doc:name="Assert equals : payload " doc:id="c409859d-3549-486c-8440-d05181ade055" actual="#[payload]" expected="#[readUrl('classpath://files//query-customer-final-response.dwl')]"/>
+			<munit-tools:verify-call doc:name="Verify call : End" doc:id="85f64d7b-e0a3-4f5f-bb0d-62da7df6e9ee" processor="json-logger:logger">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="7fa21a7b-8986-46ce-bdd2-eb716a45fe57" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="ek-micorp-sapi-create-customer-success-test" doc:id="c95b8b7e-7ab1-456b-a8df-9b5b01b761e3" description="Test">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when : Create Customer" doc:id="028575c6-73b4-4f6a-a94b-ed40a721ff6b" processor="salesforce:create">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="df4e75dc-e29a-44b3-b103-453fc4b4a081" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[readUrl('classpath://files//create-customer-output.dwl')]" mediaType="application/java" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Event : payload" doc:id="04fb55c9-4679-41c6-be12-c43da65c215a" >
+				<munit:payload value="#[readUrl('classpath://files//create-customer-input.dwl')]" mediaType="application/json" />
+				<munit:variables >
+					<munit:variable key="correlationID" value="3115520d-415c-4a8b-929f-2b5b1fd5cacd" />
+				</munit:variables>
+			</munit:set-event>
+			<flow-ref doc:name="Flow-ref to post:\customer:application\json:ek-micorp-sapi-config" doc:id="96f5fa90-5c00-49e3-9000-944671d44781" name="post:\customer:application\json:ek-micorp-sapi-config"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-equals doc:name="Assert equals : Payload" doc:id="4d0a58ce-6fcd-42ed-a3d8-394e5b7e459e" actual="#[payload]" expected="#[readUrl('classpath://files//create-customer-output.dwl')]"/>
+			<munit-tools:verify-call doc:name="Verify call : End" doc:id="6ad32a5b-53fa-4c01-935c-596926c8b7c1" processor="json-logger:logger">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="a6970b63-71da-46d2-8e9a-93420c85a9e3" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="ek-micorp-sapi-create-order-success-test" doc:id="41f5da23-3ed3-4137-a88a-ccbbdcf0087f" description="Test">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when : Create Order" doc:id="25563692-43c8-4a9e-a382-8694bc739400" processor="salesforce:create" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="d1d1c3c7-0614-4770-a564-c66c28c91b8a" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[readUrl('classpath://files//create-order-output.dwl')]" mediaType="application/java" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Event : payload" doc:id="263a93ce-001f-4d66-a1c7-2a6566d557ad">
+				<munit:payload value="#[readUrl('classpath://files//create-order-input.dwl')]" mediaType="application/json" />
+				<munit:variables >
+					<munit:variable key="correlationID" value="3115520d-415c-4a8b-929f-2b5b1fd5cacd" />
+				</munit:variables>
+			</munit:set-event>
+			<flow-ref doc:name="Flow-ref to post:\order:application\json:ek-micorp-sapi-config" doc:id="11450f07-b4a8-4275-adcb-f5099d3dcb0d" name="post:\order:application\json:ek-micorp-sapi-config"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-equals doc:name="Assert equals : Payload" doc:id="66f28464-4591-4aea-8fbf-2415e4fe7e58" actual="#[payload]" expected="#[readUrl('classpath://files//create-order-output.dwl')]" />
+			<munit-tools:verify-call doc:name="Verify call : End" doc:id="ae168ec8-e1ed-45fc-9330-8d0e0a6f0a13" processor="json-logger:logger" atLeast="1">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="184d1a62-6c6a-4efb-a416-8c28ba6191ff" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="ek-micorp-sapi-order-failure-test-suite" doc:id="9ebe4e3c-6dc6-4fd2-b964-6536cbf2c9e1" description="Test" expectedErrorType="SALESFORCE:CONNECTIVITY">
+		<munit:behavior>
+			<munit-tools:mock-when doc:name="Mock when : Create Order" doc:id="a0d93e8d-9cc8-4c06-9f35-40dcf8ca80d1" processor="salesforce:create">
+				<munit-tools:with-attributes>
+					<munit-tools:with-attribute whereValue="d1d1c3c7-0614-4770-a564-c66c28c91b8a" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return>
+					<munit-tools:error typeId="SALESFORCE:CONNECTIVITY" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution>
+			<munit:set-event doc:name="Set Event : payload" doc:id="7ec8a5c5-68b7-43e8-b636-4aae8f53d641">
+				<munit:payload value="#[readUrl('classpath://files//create-order-failure-input.dwl')]" mediaType="application/json" />
+				<munit:variables>
+					<munit:variable key="correlationId" value="2345-2345-2342345-234" />
+				</munit:variables>
+			</munit:set-event>
+			<flow-ref doc:name="Flow-ref to post:\order:application\json:ek-micorp-sapi-config" doc:id="80661a15-d3c0-4281-87f5-5a0b42840eb6" name="post:\order:application\json:ek-micorp-sapi-config" />
+		</munit:execution>
+		<munit:validation>
+			<munit-tools:verify-call doc:name="Verify call : Error Logger" doc:id="09fb35d4-7c9d-411c-a97a-48cb1c71ea47" processor="json-logger:logger">
+				<munit-tools:with-attributes>
+					<munit-tools:with-attribute whereValue="3aa202e6-3f6e-4216-9868-b46450be8329" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="ek-micorp-sapi-create-item-success-test" doc:id="4db883b2-abbf-4390-badf-e531f7227d28" description="Test">
+		<munit:behavior>
+			<munit-tools:mock-when doc:name="Mock when : Create item" doc:id="a8cc2c8c-20bc-4ad9-9700-f4fd63d10cd4" processor="salesforce:create">
+				<munit-tools:with-attributes>
+					<munit-tools:with-attribute whereValue="d204aaad-b909-43f2-abdd-73eb34b3f15e" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return>
+					<munit-tools:payload value="#[readUrl('classpath://files//create-item-output.dwl')]" mediaType="application/java" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution>
+			<munit:set-event doc:name="Set Event : payload" doc:id="9139ac66-308f-404b-ab49-6b50ab5c0a8c">
+				<munit:payload value="#[readUrl('classpath://files//create-item-input.dwl')]" mediaType="application/json" />
+				<munit:variables>
+					<munit:variable key="correlationID" value="3115520d-415c-4a8b-929f-2b5b1fd5cacd" />
+				</munit:variables>
+			</munit:set-event>
+			<flow-ref doc:name="Flow-ref to post:\item:application\json:ek-micorp-sapi-config" doc:id="dcc159b0-841d-4182-9a7c-d1859a669110" name="post:\item:application\json:ek-micorp-sapi-config" />
+		</munit:execution>
+		<munit:validation>
+			<munit-tools:assert-equals doc:name="Assert equals : Payload" doc:id="435df01d-55f3-47ee-a5f1-4f3480268379" actual="#[payload]" expected="#[readUrl('classpath://files//create-item-output.dwl')]" />
+			<munit-tools:verify-call doc:name="Verify call : End" doc:id="a6df8ab5-07cc-4381-9934-f4d87be95881" processor="json-logger:logger" atLeast="1">
+				<munit-tools:with-attributes>
+					<munit-tools:with-attribute whereValue="12a4a0a0-f1f6-4a2d-9de6-fd1b89cdcf47" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="ek-micorp-sapi-main-flow-success-test" doc:id="307e711b-fefb-4a87-8889-c95ec6919f39" description="Test" expectedErrorType="MULE:UNKNOWN">
+		<munit:execution>
+			<munit:set-event doc:name="Set Event : attributes " doc:id="8959c839-fb57-4e01-938e-050ec831fff5">
+				<munit:attributes value='#[{&#10;	"correlation-id" : 2134-2134-23423&#10;}]' />
+			</munit:set-event>
+			<flow-ref doc:name="Flow-ref to ek-micorp-sapi-main" doc:id="dc2c0b1b-beac-4e48-abb9-37a6219cec18" name="ek-micorp-sapi-main" />
+		</munit:execution>
+		<munit:validation>
+			<munit-tools:assert-equals doc:name="Assert equals : Variable" doc:id="d279a566-ac0c-45ee-bb8c-edb64d200a6f" actual="#[vars.correlationId]" expected="2134-2134-23423" />
+			<munit-tools:verify-call doc:name="Verify call  : APIKit Router" doc:id="c06c5bcc-f22c-4f7b-a182-125a6437db70" processor="apikit:router" atLeast="1">
+				<munit-tools:with-attributes>
+					<munit-tools:with-attribute whereValue="ek-micorp-sapi-config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="ek-micorp-sapi-create-item-failure-test" doc:id="9e91743b-cdd8-4eeb-86c3-1c3e43631b5e" description="Test" expectedErrorType="SALESFORCE:INVALID_INPUT">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when : Create item" doc:id="c8b73534-a9e3-44ac-a42c-58e76be36be9" processor="salesforce:create" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="d204aaad-b909-43f2-abdd-73eb34b3f15e" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="SALESFORCE:INVALID_INPUT" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Event : payload" doc:id="444795b0-d7ae-4c63-af2a-0068f7c8f38c" >
+				<munit:payload value="#[readUrl('classpath://files//create-item-input.dwl')]" mediaType="application/json" />
+				<munit:variables >
+					<munit:variable key="correlationID" value="3115520d-415c-4a8b-929f-2b5b1fd5cacd" />
+				</munit:variables>
+			</munit:set-event>
+			<flow-ref doc:name="Flow-ref to post:\item:application\json:ek-micorp-sapi-config" doc:id="95be1eb4-0074-40bd-a57e-05a78c6a236b" name="post:\item:application\json:ek-micorp-sapi-config" />
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:verify-call doc:name="Verify call : Invalid Login Credentials " doc:id="e4efd136-fc58-45a0-8909-1eb27ea31d27" processor="ee:transform" atLeast="1" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="c8c615b8-97cf-4ed7-a10e-ccb2e4a31bef" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="ek-micorp-sapi-customer-details-failure-test" doc:id="9185e282-4fc1-478e-9c83-1991d76cd936" description="Test" expectedErrorType="SALESFORCE:CONNECTIVITY">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when : Customer Details" doc:id="f63584f1-055c-4a64-81f7-01da94c9f8a9" processor="salesforce:query" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="8609309e-0a81-43d7-aec5-d53d4f786b70" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="SALESFORCE:CONNECTIVITY" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Event : payload" doc:id="2261f2dd-a806-4710-a7af-8445bf876e88" >
+				<munit:payload value="#[{&#10;    &quot;query&quot;:&quot;SELECT Name,firstName__c, lastName__c FROM micorpCustomer__c WHERE email__c = 'easwanth12@gmail.com'&quot;&#10;}]" mediaType="application/json" />
+				<munit:variables >
+					<munit:variable key="correlationID" value="3115520d-415c-4a8b-929f-2b5b1fd5cacd" />
+				</munit:variables>
+			</munit:set-event>
+			<flow-ref doc:name="Flow-ref to get:\customer:ek-micorp-sapi-config" doc:id="99ae9895-c89f-4f42-bf78-332a337c382d" name="get:\customer:ek-micorp-sapi-config" />
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:verify-call doc:name="Verify call : Connectivity Error" doc:id="22fd3f19-d974-4dd1-bb18-2b0c44309692" processor="ee:transform" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="e7f67f29-bff2-4727-825d-2dcf9957f1cb" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="ek-micorp-sapi-create-customer-failure-test" doc:id="74ec497f-696d-4dc9-8dd3-0cf35e27f7b4" description="Test" expectedErrorType="SALESFORCE:INVALID_RESPONSE">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when : Create Customer" doc:id="7c76f9ac-60b0-4eec-a95d-5ad594f74f90" processor="salesforce:create" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="df4e75dc-e29a-44b3-b103-453fc4b4a081" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="SALESFORCE:INVALID_RESPONSE" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Event : payload" doc:id="b800d2f6-0a20-4947-a6ec-d0aa36cee6bd" >
+				<munit:payload value="#[readUrl('classpath://files//create-customer-input.dwl')]" mediaType="application/json" />
+				<munit:variables >
+					<munit:variable key="correlationID" value="3115520d-415c-4a8b-929f-2b5b1fd5cacd" />
+				</munit:variables>
+			</munit:set-event>
+			<flow-ref doc:name="Flow-ref to post:\customer:application\json:ek-micorp-sapi-config" doc:id="56d96a64-9074-448c-86d4-c17ec0087015" name="post:\customer:application\json:ek-micorp-sapi-config" />
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:verify-call doc:name="Verify call : End" doc:id="3e4b6e47-3ba8-4a09-a95d-75dd886ecb0c" processor="json-logger:logger" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="3aa202e6-3f6e-4216-9868-b46450be8329" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+		</munit:validation>
+	</munit:test>
+
+
+</mule>

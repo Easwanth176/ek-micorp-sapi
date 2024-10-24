@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce" xmlns:json-logger="http://www.mulesoft.org/schema/mule/json-logger"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:module-error-handler-plugin="http://www.mulesoft.org/schema/mule/module-error-handler-plugin" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/module-error-handler-plugin http://www.mulesoft.org/schema/mule/module-error-handler-plugin/current/mule-module-error-handler-plugin.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/json-logger http://www.mulesoft.org/schema/mule/json-logger/current/mule-json-logger.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd">
+	<error-handler name="global-error-handler" doc:id="66ee35e3-7805-451c-bc6a-033a7a34a583" >
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="e1f51ce4-1c71-41f2-84ce-6b57ac983a76" type="SALESFORCE:INVALID_INPUT">
+			<ee:transform doc:name="Invalid Login Credentials Error" doc:id="c8c615b8-97cf-4ed7-a10e-ccb2e4a31bef">
+				<ee:message>
+					<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"Error":error.detailDescription
+}]]></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+		</on-error-propagate>
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="6967fb0a-3988-43a3-ba3c-b88bcc73daab" type="SALESFORCE:CONNECTIVITY">
+				<ee:transform doc:name="SalesForce Connectivity Error" doc:id="e7f67f29-bff2-4727-825d-2dcf9957f1cb">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/java
+---
+{
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</on-error-propagate>
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="4c0b1edf-b744-4826-8f74-4497472f69a9" type="ANY">
+			<module-error-handler-plugin:process-error doc:name="Process Error" doc:id="e34c98b4-17a1-4377-bf2c-b737dcf3cf37" />
+			<ee:transform doc:name="Prepare Error Payload" doc:id="80ef5f95-ae21-416c-9e30-ad536c64b0da">
+				<ee:message>
+					<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+    "appName": app.name,
+    "errorCode": payload.error.code,
+    "errorReason": payload.error.reason,
+    "errorMessage": payload.error.message,
+    "correlationId": if ( vars.correlationId != null ) vars.correlationId else correlationId,
+    "timeStamp": if ( vars.timeStamp != null ) vars.timeStamp else now(),
+}]]></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+			<json-logger:logger doc:name="Error Payload" doc:id="3aa202e6-3f6e-4216-9868-b46450be8329" config-ref="JSON_Logger_Config" message="#[error.description]" />
+		</on-error-propagate>
+	</error-handler>
+</mule>

@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns:json-logger="http://www.mulesoft.org/schema/mule/json-logger" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd 
+http://www.mulesoft.org/schema/mule/json-logger http://www.mulesoft.org/schema/mule/json-logger/current/mule-json-logger.xsd">
+
+  
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+	<flow name="ek-micorp-sapi-main">
+        <http:listener config-ref="ek-micorp-sapi-httpListenerConfig" path="/api/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body>#[payload]</http:body>
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:error-response>
+        </http:listener>
+        <set-variable value="#[if (attributes.headers.'correlation-id' != null) &#10;  attributes.headers.'correlation-id'&#10;else &#10;  uuid()]" doc:name="var : correlationID" doc:id="0b8fa250-3433-464a-9529-7990cd03be2e" variableName="correlationId "/>
+		<apikit:router config-ref="ek-micorp-sapi-config" />
+		<error-handler ref="global-error-handler" />
+    </flow>
+    <flow name="get:\healthcheck:ek-micorp-sapi-config">
+        <json-logger:logger doc:name="Start" doc:id="b9c68317-262d-4733-8962-bacd1605c825" config-ref="JSON_Logger_Config" message="#[vars.correlationId]"/>
+		<flow-ref doc:name="get-health-check" doc:id="b342cc84-bc90-42d7-b2aa-d0cecf9be838" name="get-health-check" />
+		<json-logger:logger doc:name="End" doc:id="bc75d7a6-cda5-480f-a83e-26934a466fda" config-ref="JSON_Logger_Config" tracePoint="END" message="#[vars.correlationId]"/>
+		<error-handler ref="global-error-handler" />
+    </flow>
+    <flow name="get:\customer:ek-micorp-sapi-config">
+        <json-logger:logger doc:name="Start" doc:id="e0626f0a-e744-4902-866f-aee38c8f6547" config-ref="JSON_Logger_Config" message='#[vars.correlationId]' />
+		<flow-ref doc:name="get-customer-sub-flow" doc:id="07fa8b16-5c51-4cfa-96d6-0daa89a0446f" name="get-customer-sub-flow" />
+		<json-logger:logger doc:name="End" doc:id="8766eff9-2199-4d56-9637-b94712e82524" config-ref="JSON_Logger_Config" tracePoint="END" message='#[vars.correlationId]' />
+		<error-handler ref="global-error-handler" />
+    </flow>
+	<flow name="post:\customer:application\json:ek-micorp-sapi-config">
+        <json-logger:logger doc:name="Start" doc:id="a137fbae-f1d4-4000-803a-96dd9eea38eb" config-ref="JSON_Logger_Config" message='#[vars.correlationId]'/>
+		<flow-ref doc:name="create-customer-sub-flow" doc:id="a9c22309-77b3-4dcc-b2b2-e1c5e82858d4" name="create-customer-sub-flow" />
+		<json-logger:logger doc:name="End" doc:id="36d51990-e711-448a-9ccf-6bc2e10796c5" config-ref="JSON_Logger_Config" message='#[vars.correlationId]' tracePoint="END"/>
+		<error-handler ref="global-error-handler" />
+    </flow>
+    <flow name="post:\item:application\json:ek-micorp-sapi-config">
+        <json-logger:logger doc:name="Start" doc:id="235a52db-ea3a-421e-bcfe-8a8998475fed" config-ref="JSON_Logger_Config" message='#[vars.correlationId]'/>
+		<flow-ref doc:name="create-item-sub-flow" doc:id="03fc666c-14d8-4c7e-9f68-bc09f45f927e" name="create-item-sub-flow" />
+		<json-logger:logger doc:name="End" doc:id="61a36756-e36f-4d78-a37f-4454a50a8b67" config-ref="JSON_Logger_Config" message='#[vars.correlationId]' tracePoint="END"/>
+		<error-handler ref="global-error-handler" />
+    </flow>
+    <flow name="post:\order:application\json:ek-micorp-sapi-config">
+        <json-logger:logger doc:name="Start" doc:id="43b26c6d-3522-4d59-9a8d-d3495f1bd243" config-ref="JSON_Logger_Config" message='#[vars.correlationId]'/>
+		<flow-ref doc:name="create-order-sub-flow" doc:id="113c9796-94bc-450e-8f9a-fcf2d63b3090" name="create-order-sub-flow" />
+		<json-logger:logger doc:name="End" doc:id="ca854557-0ea9-47dc-ba66-e5acc711fe10" config-ref="JSON_Logger_Config" tracePoint="END" message='#[vars.correlationId]'/>
+		<error-handler ref="global-error-handler" />
+    </flow>
+</mule>

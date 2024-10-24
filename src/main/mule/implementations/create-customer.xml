@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:json-logger="http://www.mulesoft.org/schema/mule/json-logger"
+	xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
+http://www.mulesoft.org/schema/mule/json-logger http://www.mulesoft.org/schema/mule/json-logger/current/mule-json-logger.xsd">
+	<sub-flow name="create-customer-sub-flow" doc:id="f14c1944-83cf-485c-b092-fb36142687d2" >
+		<json-logger:logger doc:name="Start" doc:id="cf375e71-ad1f-4375-a8f7-f694a7ee1cc5" config-ref="JSON_Logger_Config" message="#[vars.correlationId]"/>
+		<salesforce:create doc:name="Create Customer" doc:id="df4e75dc-e29a-44b3-b103-453fc4b4a081" config-ref="Salesforce_Config" type="micorpCustomer__c">
+			<salesforce:records ><![CDATA[#[%dw 2.0
+output application/json
+---
+[{
+  "firstName__c": payload.firstName,
+  "lastName__c": payload.lastName,
+  "phoneNumber__c": payload.phoneNumber,
+  "email__c": payload.email,
+  "address1__c": payload.address.address1,
+  "city__c": payload.address.city,
+  "zipCode__c": payload.address.zipCode,
+  "country__c": payload.address.country
+}]]]]></salesforce:records>
+		</salesforce:create>
+		<ee:transform doc:name="Customer Response" doc:id="ef052af6-1ce2-4d0e-86e7-d61ddc88b2e0">
+			<ee:message>
+				<ee:set-payload resource="dwl/p-customer-response.dwl" />
+			</ee:message>
+		</ee:transform>
+		<json-logger:logger doc:name="End" doc:id="a6970b63-71da-46d2-8e9a-93420c85a9e3" config-ref="JSON_Logger_Config" message="#[vars.correlationId]" tracePoint="END"/>
+	
+</sub-flow>
+	
+	
+</mule>

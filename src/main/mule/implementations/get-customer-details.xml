@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce"
+	xmlns:json-logger="http://www.mulesoft.org/schema/mule/json-logger" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/json-logger http://www.mulesoft.org/schema/mule/json-logger/current/mule-json-logger.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd">
+	
+	    <sub-flow name="get-customer-sub-flow" doc:id="4cff718e-59cb-4fb5-a2d8-1b5fb8184c91" >
+		<json-logger:logger doc:name="Start" doc:id="316ac021-b1e2-4ee6-a696-141d373e033d" config-ref="JSON_Logger_Config" message="#[vars.correlationId]"/>
+		<salesforce:query doc:name="Customer Details" doc:id="8609309e-0a81-43d7-aec5-d53d4f786b70" config-ref="Salesforce_Config">
+			<salesforce:salesforce-query ><![CDATA[#[payload.query]
+]]></salesforce:salesforce-query>
+		</salesforce:query>
+		<ee:transform doc:name="Convert to JSON" doc:id="53bcc16d-0160-4f0e-b92d-2e9cd820bb66" >
+			<ee:message >
+				<ee:set-payload resource="dwl/p-customer-query-response.dwl" />
+			</ee:message>
+		</ee:transform>
+		<json-logger:logger doc:name="End" doc:id="7fa21a7b-8986-46ce-bdd2-eb716a45fe57" config-ref="JSON_Logger_Config" message="#[vars.correlationId]" tracePoint="END"/>
+	
+</sub-flow>
+	
+	
+	</mule>

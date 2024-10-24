@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:json-logger="http://www.mulesoft.org/schema/mule/json-logger"
+	xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
+http://www.mulesoft.org/schema/mule/json-logger http://www.mulesoft.org/schema/mule/json-logger/current/mule-json-logger.xsd">
+	<sub-flow name="create-item-sub-flow" doc:id="b3f9842e-c4e8-4525-b23e-06dbfe5dcf55" >
+		<json-logger:logger doc:name="Start" doc:id="0b66c152-c4e5-4ee6-a74e-66254613d1ae" config-ref="JSON_Logger_Config" message="#[vars.correlationId]"/>
+		<salesforce:create doc:name="Create Item" doc:id="d204aaad-b909-43f2-abdd-73eb34b3f15e" config-ref="Salesforce_Config" type="micorpItem__c">
+			<reconnect />
+			<salesforce:records><![CDATA[#[%dw 2.0
+output application/json
+---
+payload map ((item) -> {
+    "id__c": item.id,
+    "category__c": item.category,
+    "quantity__c": item.quantity,
+    "size__c": item.size,
+    "micorpOrders__c": item.orderId
+})]]]></salesforce:records>
+		</salesforce:create>
+		<ee:transform doc:name="Item Response">
+            <ee:message>
+				<ee:set-payload resource="dwl/p-item-response.dwl" />
+            
+</ee:message>
+        </ee:transform>
+		<json-logger:logger doc:name="End" doc:id="12a4a0a0-f1f6-4a2d-9de6-fd1b89cdcf47" config-ref="JSON_Logger_Config" message="#[vars.correlationId]"/>
+	
+</sub-flow>
+	
+	
+	
+	</mule>
